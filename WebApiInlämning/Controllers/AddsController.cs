@@ -72,13 +72,13 @@ namespace WebApiInlämning.Controllers
             return NoContent();
         }
         [HttpPatch]
-        [Route("{Id})")]
-        public IActionResult JsonPatchWithModelState(JsonPatchDocument<Advertisement> adUpdate, int Id)
+        [Route("{Id}")]
+        public IActionResult Patch([FromBody]JsonPatchDocument<Advertisement> adUpdate, int Id)
         {
             var getAd = _context.Advertisements.FirstOrDefault(a => a.Id == Id);
             if (getAd == null) return NotFound();
             adUpdate.ApplyTo(getAd);
-            _context.Update(getAd);
+            //_context.Update(getAd);
             _context.SaveChanges();
             return NoContent();
         }
