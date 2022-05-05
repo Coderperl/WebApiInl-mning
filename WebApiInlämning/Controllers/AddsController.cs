@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using WebApiInlämning.Data;
 using WebApiInlämning.DTO;
@@ -9,20 +10,24 @@ namespace WebApiInlämning.Controllers
     public class AddsController :ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public AddsController(ApplicationDbContext context)
+        public AddsController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
         [HttpGet]
         public IActionResult GetAdds()
         {
-            return Ok(_context.Advertisements.Select(a => new AdvertisementDTO()
-            {
-                Name = a.Name,
-                Description = a.Description,
-                Id = a.Id
-            }).ToList());
+            return Ok(_context.Advertisements.Select(a => _mapper.Map<AdvertisementsDTO>(a)));
+
+            //return Ok(_context.Advertisements.Select(a => new AdvertisementDTO()
+            //{
+            //    Name = a.Name,
+            //    Description = a.Description,
+            //    Id = a.Id
+            //}).ToList());
         }
         [HttpGet]
         [Route("{Id}")]
@@ -31,33 +36,36 @@ namespace WebApiInlämning.Controllers
             var advertisement = _context.Advertisements.FirstOrDefault(a => a.Id == Id);
             if (advertisement == null)
                 return NotFound();
-            var ret = new AdvertisementDTO()
-            {
-                Id = advertisement.Id,
-                Name = advertisement.Name,
-                Description = advertisement.Description,
-            };
-            return Ok(ret);
+            return Ok(_mapper.Map<AdvertisementDTO>(advertisement));
+            //var ret = new AdvertisementDTO()
+            //{
+            //    Id = advertisement.Id,
+            //    Name = advertisement.Name,
+            //    Description = advertisement.Description,
+            //};
+            //return Ok(ret);
         }
 
         [HttpPost]
         public IActionResult Create(CreateAdvertisementDTO advertisement)
         {
-            var ad = new Advertisement()
-            {
-                Name = advertisement.Name,
-                Description = advertisement.Description
-            };
-            _context.Advertisements.Add(ad);
+            var mapAd = _mapper.Map<Advertisement>(advertisement);
+            //var ad = new Advertisement()
+            //{
+            //    Name = advertisement.Name,
+            //    Description = advertisement.Description
+            //};
+            _context.Advertisements.Add(mapAd);
             _context.SaveChanges();
-            var adDTO = new AdvertisementDTO()
-            {
-                Name = ad.Name,
-                Description = ad.Description,
-                Id = ad.Id,
-            };
+            var adMapDto = _mapper.Map<Advertisement>(mapAd);
+            //var adDTO = new AdvertisementDTO()
+            //{
+            //    Name = ad.Name,
+            //    Description = ad.Description,
+            //    Id = ad.Id,
+            //};
             
-            return CreatedAtAction(nameof(GetAd), new {Id = ad.Id},adDTO);
+            return CreatedAtAction(nameof(GetAd), new {Id = mapAd.Id}, adMapDto);
         }
 
         [HttpPut]
@@ -66,8 +74,9 @@ namespace WebApiInlämning.Controllers
         {
             var getAd = _context.Advertisements.FirstOrDefault(a => a.Id == Id);
             if (getAd == null) return NotFound();
-            getAd.Name = advertisement.Name;
-            getAd.Description = advertisement.Description;
+            _mapper.Map(advertisement, getAd);
+            //getAd.Name = advertisement.Name;
+            //getAd.Description = advertisement.Description;
             _context.SaveChanges();
             return NoContent();
         }

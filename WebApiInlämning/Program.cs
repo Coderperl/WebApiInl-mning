@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApiInlämning;
 using WebApiInlämning.Data;
+using WebApiInlämning.Infrastructure.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddTransient<DataInitializer>();
+builder.Services.AddAutoMapper(typeof(AdvertisementProfile));
 
 
 var app = builder.Build();
