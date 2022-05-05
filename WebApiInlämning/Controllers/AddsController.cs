@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using WebApiInlämning.Data;
@@ -31,6 +32,7 @@ namespace WebApiInlämning.Controllers
         }
         [HttpGet]
         [Route("{Id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetAd(int Id)
         {
             var advertisement = _context.Advertisements.FirstOrDefault(a => a.Id == Id);
